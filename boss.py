@@ -21,7 +21,6 @@ class Node:
                 return found
 
     def add_children(self, name):
-        # print("adding {} -> {}".format(self.name, name))
         n = Node(name)
         n.parent = self
         self.children.append(n)
@@ -43,16 +42,15 @@ class Finder:
 
     def process_line(self, l):
         boss, worker = l.split()
-        self.names.append(boss)
-        self.names.append(worker)  # very hacky!!   !
-        # print("{} -> {}".format(boss, worker))
-        if not self.root or boss not in self.names:
+        if self.root is None or boss not in self.names:
             man = Node(boss)
             man.add_children(worker)
             if self.root is None:
                 self.root = man
         else:
             self.root.find(boss).add_children(worker)
+        self.names.append(boss)
+        self.names.append(worker)
 
     def do_it(self, fn):
         with open(fn) as fp:
@@ -63,19 +61,15 @@ class Finder:
             for line in lines[3:]:
                 self.process_line(line.strip())
 
-        # self.root.dump()
-        # print("common {}, {}".format(self.name1, self.name2))
         one = self.root.find(self.name1)
         two = self.root.find(self.name2)
         print(self._find_common_boss(one, two))
 
     def _find_common_boss(self, who1, who2):
-        # print("common {} {}".format(who1.name, who2.name))
         if who1.find(who2.name):
             return who1.name
         if who2.find(who1.name):
             return who2.name
-        name = None
         name = self._find_common_boss(who1.parent, who2)
         if name:
             return name
